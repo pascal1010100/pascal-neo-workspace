@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
   },
   { 
     name: 'Módulos', 
-    href: '#modulos',
+    href: '#featured-modules',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
         <rect width="7" height="7" x="3" y="3" rx="1"></rect>
@@ -38,7 +38,7 @@ const navItems: NavItem[] = [
   },
   { 
     name: 'Características', 
-    href: '#caracteristicas',
+    href: '#features',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
         <path d="M12 2v4"></path>
@@ -54,7 +54,7 @@ const navItems: NavItem[] = [
   },
   { 
     name: 'Tareas', 
-    href: '#tareas',
+    href: '#tasks',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
         <path d="M3 3v18h18"></path>
@@ -154,10 +154,34 @@ export function Navbar() {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
 
-  // Handle nav item click
+  // Handle nav item click with smooth scrolling
   const handleNavClick = useCallback((href: string) => {
-    setActiveSection(href.substring(1));
+    const sectionId = href.substring(1);
+    setActiveSection(sectionId);
     setIsMenuOpen(false);
+    
+    // If it's not the home link
+    if (href !== '#') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        // Calculate the position to scroll to, accounting for the fixed header
+        const headerOffset = 80; // Adjust this value based on your header height
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        // Smooth scroll to the section
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    } else {
+      // If it's the home link, scroll to top
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   }, []);
 
   // Check if dark mode is active

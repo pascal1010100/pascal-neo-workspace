@@ -19,12 +19,18 @@ const FeaturedModules = dynamic(
   { ssr: false, loading: () => <div>Loading Modules...</div> }
 );
 
+const Tasks = dynamic(
+  () => import('@/components/sections/Tasks').then((mod) => mod.default),
+  { ssr: false, loading: () => <div>Loading Tasks...</div> }
+);
+
 export default function Home() {
   return (
     <PageLayout>
       <Hero />
       <Features />
       <FeaturedModules />
+      <Tasks />
     </PageLayout>
   );
 }

@@ -31,7 +31,7 @@ const modules = [
 
 const FeaturedModules = () => {
   return (
-    <Section id="modules" variant="default" spacing="lg">
+    <Section id="featured-modules" variant="default" spacing="lg">
       <Container>
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
