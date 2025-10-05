@@ -36,12 +36,6 @@ export default function Home() {
           ))}
         </div>
       </div>
-      
-      <footer className="mt-24 py-6 border-t border-border/50">
-        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          <p>© {new Date().getFullYear()} Pascal Neo. Todos los derechos reservados.</p>
-        </div>
-      </footer>
     </main>
   );
 }
