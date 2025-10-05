@@ -63,10 +63,10 @@ const Hero: FC = () => {
           >
             <span className="block mb-2">Potencia tu</span>
             <span className="relative inline-block">
-              <span className="relative z-10 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <span className="relative z-10 bg-gradient-to-r from-[#E6005C] to-[#00B8CC] dark:from-primary dark:to-secondary bg-clip-text text-transparent">
                 flujo de trabajo
               </span>
-              <span className="absolute -bottom-2 left-0 right-0 h-3 bg-gradient-to-r from-primary/20 to-secondary/20 dark:from-primary/30 dark:to-secondary/30 rounded-full blur-md"></span>
+              <span className="absolute -bottom-2 left-0 right-0 h-3 bg-gradient-to-r from-primary-200/50 to-secondary-200/50 dark:from-primary/30 dark:to-secondary/30 rounded-full blur-md"></span>
             </span>
           </motion.h1>
           
@@ -87,7 +87,11 @@ const Hero: FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Button size="lg" variant="gradient" className="group">
+            <Button 
+              size="lg" 
+              variant="gradient" 
+              className="group bg-gradient-to-r from-[#E6005C] to-[#00B8CC] hover:from-[#B30047] hover:to-[#008699] text-white dark:from-primary dark:to-secondary dark:hover:from-primary/90 dark:hover:to-secondary/90"
+            >
               Comenzar ahora
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
