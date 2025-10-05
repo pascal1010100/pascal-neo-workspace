@@ -46,6 +46,12 @@ export default {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
+        // Colores personalizados para el tema kawaii
+        pink: {
+          100: '#FFE4E6',
+          500: '#EC4899',
+          900: '#831843',
+        },
         popover: {
           DEFAULT: 'hsl(var(--popover))',
           foreground: 'hsl(var(--popover-foreground))',
