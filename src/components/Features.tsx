@@ -1,8 +1,8 @@
 'use client';
 
-import { motion, type Variants, useInView } from 'framer-motion';
-import { useRef } from 'react';
-import { Sparkles, Zap, Palette, Code, Smartphone, Heart } from 'lucide-react';
+import { motion, type Variants, useInView, useScroll, useTransform } from 'framer-motion';
+import { useRef, useState, useEffect } from 'react';
+import { Sparkles, Zap, Palette, Code, Smartphone, Heart, ArrowRight } from 'lucide-react';
 
 const features = [
   {
@@ -58,7 +58,7 @@ const container: Variants = {
 const item: Variants = {
   hidden: { 
     opacity: 0, 
-    y: 30,
+    y: 20,
     scale: 0.98
   },
   show: { 
@@ -69,41 +69,70 @@ const item: Variants = {
       duration: 0.6,
       ease: [0.16, 1, 0.3, 1],
     }
+  },
+  hover: {
+    y: -8,
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 15
+    }
   }
 };
 
 export default function Features() {
-  const ref = useRef(null);
+  const [isClient, setIsClient] = useState(false);
+  const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start']
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '10%']);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.02]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
-    <section 
+    <motion.section 
       id="caracteristicas" 
       ref={ref}
-      className="relative py-24 overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900"
+      className="relative py-24 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)/0.3) 100%)',
+        y,
+        scale,
+        opacity
+      }}
     >
-      {/* Efecto de estrellas */}
+      {/* Background with stars - Client-side only */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        {[...Array(40)].map((_, i) => (
-          <div 
-            key={i}
-            className="absolute rounded-full bg-white/80 animate-pulse"
-            style={{
-              width: Math.random() * 3 + 1 + 'px',
-              height: Math.random() * 3 + 1 + 'px',
-              left: Math.random() * 100 + '%',
-              top: Math.random() * 100 + '%',
-              animationDuration: Math.random() * 3 + 2 + 's',
-              opacity: Math.random() * 0.8 + 0.2
-            }}
-          />
-        ))}
+        {isClient && [...Array(30)].map((_, i) => {
+          const size = Math.random() * 3 + 1;
+          return (
+            <div 
+              key={i}
+              className="absolute rounded-full bg-foreground/80 dark:bg-white/80 animate-pulse"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDuration: `${Math.random() * 3 + 2}s`,
+                opacity: Math.random() * 0.5 + 0.1
+              }}
+            />
+          );
+        })}
       </div>
       
-      {/* Gradientes decorativos */}
+      {/* Decorative gradients */}
       <div className="absolute inset-0 -z-20">
-        <div className="absolute -right-40 -top-40 w-[500px] h-[500px] rounded-full bg-gradient-to-r from-pink-500/10 to-transparent blur-[100px]"></div>
-        <div className="absolute -left-40 -bottom-40 w-[600px] h-[600px] rounded-full bg-gradient-to-l from-cyan-500/10 to-transparent blur-[120px]"></div>
+        <div className="absolute -right-40 -top-40 w-[500px] h-[500px] rounded-full bg-gradient-to-r from-accent/5 to-transparent blur-[100px] dark:from-accent/10"></div>
+        <div className="absolute -left-40 -bottom-40 w-[600px] h-[600px] rounded-full bg-gradient-to-l from-accent-2/5 to-transparent blur-[120px] dark:from-accent-2/10"></div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -113,42 +142,68 @@ export default function Features() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <motion.span 
-            className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-sm font-medium mb-6"
-            style={{
-              background: 'hsl(var(--accent-2)/0.1)',
-              color: 'hsl(var(--accent-2))',
-              border: '1px solid hsl(var(--accent-2)/0.2)',
-              backdropFilter: 'blur(4px)'
+          <motion.div 
+            className="inline-flex items-center justify-center px-5 py-2 rounded-full text-sm font-medium mb-8 md:mb-10 bg-accent-2/10 dark:bg-accent-2/10 border border-accent-2/20 dark:border-accent-2/20 backdrop-blur-sm"
+            variants={item}
+            whileHover={{
+              background: 'hsl(var(--accent-2)/0.15)',
+              scale: 1.05,
+              boxShadow: '0 0 20px hsl(var(--accent-2)/0.2)',
+              transition: { duration: 0.3 }
             }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.2, duration: 0.6 }}
           >
-            ✨ Características Principales
-          </motion.span>
+            <span className="relative flex h-2.5 w-2.5 mr-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-2/75 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent-2"></span>
+            </span>
+            <span className="text-accent-foreground font-medium">
+              ✨ Características Principales
+            </span>
+          </motion.div>
           
           <motion.h2 
-            className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80"
-            initial={{ opacity: 0, y: 10 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight text-foreground dark:text-white"
+            variants={item}
           >
-            Todo lo que necesitas en un solo lugar
+            <div className="mb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted-foreground dark:from-white dark:to-gray-300">
+                Todo lo que necesitas
+              </span>
+            </div>
+            <div className="relative">
+              <span className="relative z-10">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 dark:from-pink-400 dark:via-rose-400 dark:to-amber-400">
+                  en un solo lugar
+                </span>
+              </span>
+              <div className="absolute -bottom-2 left-0 right-0 h-3 bg-gradient-to-r from-pink-500/20 via-rose-500/20 to-amber-500/20 dark:from-pink-500/30 dark:via-rose-500/30 dark:to-amber-500/30 rounded-full blur-md"></div>
+            </div>
           </motion.h2>
           
           <motion.p 
-            className="text-lg text-muted-foreground"
-            initial={{ opacity: 0, y: 10 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.4, duration: 0.6 }}
+            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed"
+            variants={item}
           >
             Nuestro workspace está diseñado para potenciar tu productividad sin sacrificar la diversión y la creatividad.
           </motion.p>
+          
+          <motion.div 
+            className="flex justify-center"
+            variants={item}
+          >
+            <motion.div 
+              className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium text-accent-foreground bg-accent/10 hover:bg-accent/20 transition-colors cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Ver todas las características
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </motion.div>
+          </motion.div>
         </motion.div>
 
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
           variants={container}
           initial="hidden"
           animate={isInView ? "show" : "hidden"}
@@ -158,32 +213,25 @@ export default function Features() {
               key={index}
               className="group relative h-full"
               variants={item}
-              whileHover={{
-                y: -8,
-                transition: { 
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 15
-                }
-              }}
+              whileHover="hover"
             >
               <div className="absolute inset-0.5 bg-gradient-to-br from-transparent via-transparent to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               
               <div 
-                className="h-full p-6 rounded-xl transition-all duration-300 relative overflow-hidden"
+                className="h-full p-6 rounded-xl transition-all duration-300 relative overflow-hidden backdrop-blur-sm"
                 style={{
-                  background: 'hsl(var(--card))',
+                  background: 'hsl(var(--card)/0.7)',
                   border: '1px solid hsl(var(--border)/0.6)',
-                  boxShadow: '0 4px 24px -4px rgba(0, 0, 0, 0.05)'
+                  boxShadow: '0 8px 32px -4px rgba(0, 0, 0, 0.05)'
                 }}
               >
                 <div 
-                  className={`absolute -right-6 -top-6 w-32 h-32 rounded-full bg-gradient-to-br ${feature.color} opacity-5 -z-10`}
+                  className={`absolute -right-6 -top-6 w-32 h-32 rounded-full bg-gradient-to-br ${feature.color} opacity-5 dark:opacity-10 -z-10`}
                   aria-hidden="true"
                 />
                 
                 <div 
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110`}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110`}
                   style={{
                     background: `hsl(var(--accent)/0.1)`,
                     color: `hsl(var(--accent))`,
@@ -197,14 +245,14 @@ export default function Features() {
                   {feature.title}
                 </h3>
                 
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed mb-4">
                   {feature.description}
                 </p>
                 
-                <div 
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  aria-hidden="true"
-                />
+                <div className="mt-4 flex items-center text-sm font-medium text-accent-foreground/80 group-hover:text-accent-foreground transition-colors">
+                  <span>Saber más</span>
+                  <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </div>
               </div>
             </motion.div>
           ))}
@@ -221,12 +269,12 @@ export default function Features() {
           </p>
           <a 
             href="#" 
-            className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors bg-accent text-accent-foreground hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-full text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:opacity-90 transition-opacity"
           >
             Comenzar ahora
             <svg 
-              width="16" 
-              height="16" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
@@ -240,6 +288,6 @@ export default function Features() {
           </a>
         </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 }
