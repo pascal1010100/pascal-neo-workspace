@@ -1,10 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
-import { ThemeProvider } from "@/context/theme-context";
-import Navbar from "@/components/Navbar";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { cn } from "@/lib/utils";
+import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Configuración de fuentes
 const inter = Inter({ 
   subsets: ["latin"],
   variable: "--font-sans",
@@ -29,11 +31,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jet.variable} font-sans bg-background text-foreground antialiased min-h-screen`}>
-        <ThemeProvider>
+      <body 
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          inter.variable,
+          jet.variable,
+        )}
+      >
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
           <div className="relative flex min-h-screen flex-col">
             <Navbar />
-            <main className="flex-1 pt-16">
+            <main className="flex-1">
               {children}
             </main>
             <Footer />
