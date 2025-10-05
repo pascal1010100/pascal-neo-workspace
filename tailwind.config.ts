@@ -1,86 +1,121 @@
-import type { Config } from 'tailwindcss'
+// tailwind.config.ts
+import type { Config } from 'tailwindcss';
 
-export default {
-  darkMode: ['class', '[data-theme="dark"]'],
+const config: Config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
-    container: {
-      center: true,
-      padding: '1rem',
-      screens: {
-        '2xl': '1400px',
-      },
-    },
     extend: {
       colors: {
-        // Colores base
-        bg: 'hsl(var(--bg))',
-        fg: 'hsl(var(--fg))',
-        muted: 'hsl(var(--muted))',
-        accent: 'hsl(var(--accent))',
-        'accent-2': 'hsl(var(--accent-2))',
-        surface: 'hsl(var(--surface))',
-        success: 'hsl(var(--success))',
-        warning: 'hsl(var(--warning))',
-        error: 'hsl(var(--error))',
-        
-        // Compatibilidad con shadcn/ui
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: '#FF6B9E',
+          50: '#FFF0F5',
+          100: '#FFE0EB',
+          200: '#FFB3D1',
+          300: '#FF80B2',
+          400: '#FF4D94',
+          500: '#FF6B9E',
+          600: '#E6005C',
+          700: '#B30047',
+          800: '#800033',
+          900: '#4D001F',
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: '#00F0FF',
+          50: '#E6FBFF',
+          100: '#CCF7FF',
+          200: '#99EEFF',
+          300: '#66E4FF',
+          400: '#33DBFF',
+          500: '#00F0FF',
+          600: '#00B8CC',
+          700: '#008699',
+          800: '#005C66',
+          900: '#00333A',
         },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+        accent: {
+          DEFAULT: '#FFE66D',
+          50: '#FFFDF5',
+          100: '#FFF9E6',
+          200: '#FFF2CC',
+          300: '#FFEBB3',
+          400: '#FFE499',
+          500: '#FFE66D',
+          600: '#FFD700',
+          700: '#CCAC00',
+          800: '#998100',
+          900: '#665600',
         },
-        // Colores personalizados para el tema kawaii
-        pink: {
-          100: '#FFE4E6',
-          500: '#EC4899',
-          900: '#831843',
+        background: {
+          DEFAULT: '#0A0E23',
+          50: '#E6E8F0',
+          100: '#CCD1E0',
+          200: '#99A3C1',
+          300: '#6675A2',
+          400: '#334783',
+          500: '#0A0E23',
+          600: '#080B1C',
+          700: '#060815',
+          800: '#04060E',
+          900: '#020307',
         },
-        popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
-        },
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+        surface: {
+          DEFAULT: '#1A1F3D',
+          50: '#E8E9F0',
+          100: '#D1D3E0',
+          200: '#A3A7C1',
+          300: '#757CA2',
+          400: '#475083',
+          500: '#1A1F3D',
+          600: '#151932',
+          700: '#101327',
+          800: '#0A0C1B',
+          900: '#050610',
         },
       },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-      },
-      keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
-        },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
-        },
+      fontFamily: {
+        sans: ['var(--font-comic-neue)', 'Comic Neue', 'cursive', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-vt323)', 'VT323', 'monospace'],
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        'float': 'float 3s ease-in-out infinite',
+        'blink': 'blink 1s step-end infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        blink: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.3' },
+        }
+      },
+      backdropBlur: {
+        xs: '2px',
+        sm: '4px',
+        md: '8px',
+        lg: '12px',
+        xl: '20px',
+      },
+      boxShadow: {
+        'neon-sm': '0 0 2px theme("colors.primary.500"), 0 0 4px theme("colors.primary.500")',
+        'neon': '0 0 5px theme("colors.primary.500"), 0 0 10px theme("colors.primary.500")',
+        'neon-md': '0 0 10px theme("colors.primary.500"), 0 0 20px theme("colors.primary.500")',
+        'neon-lg': '0 0 15px theme("colors.primary.500"), 0 0 30px theme("colors.primary.500")',
+        'neon-xl': '0 0 20px theme("colors.primary.500"), 0 0 40px theme("colors.primary.500")',
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
-} satisfies Config
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+  ],
+};
+
+export default config;
