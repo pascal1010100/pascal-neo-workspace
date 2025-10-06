@@ -4,8 +4,10 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '../ui/button/Button';
 import { Container } from '../ui/container/Container';
 import { Section } from '../ui/section/Section';
-import { ArrowRight, Code, Zap, GitBranch, Shield } from 'lucide-react';
+import { ArrowRight, Code, Zap, GitBranch, Shield, Sparkles } from 'lucide-react';
 import type { FC } from 'react';
+import ParticlesBackground from '../ui/ParticlesBackground';
+import { cn } from '@/lib/utils';
 
 const stats = [
   { value: '10,000+', label: 'Desarrolladores', icon: Code },
@@ -28,8 +30,9 @@ const Hero: FC = () => {
       className="relative overflow-hidden pt-24"
       style={{ y, scale, opacity }}
     >
-      {/* Background elements */}
+      {/* Fondo con partículas */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
+        <ParticlesBackground />
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background/30" />
         
         {/* Grid pattern */}
