@@ -11,6 +11,7 @@ require.extensions['.ts'] = (mod, filename) => {
 };
 const { POST } = require('../src/app/api/ops-bridge/github/route.ts');
 const { GET } = require('../src/app/api/ops-bridge/health/route.ts');
+const { OPS_PROJECTS } = require('../src/lib/ops-bridge/project-map.ts');
 const originalFetch = global.fetch;
 let records, calls, failProject, failComplete, failRead;
 beforeEach(() => {
@@ -81,4 +82,23 @@ test('health requires auth and detects failed Notion authentication', async () =
   failRead = true; assert.equal((await GET(req())).status, 503);
   failRead = false; const response = await GET(req()); assert.equal(response.status, 200);
   assert.equal((await response.json()).productionReady, false);
+});
+
+
+test('project map keeps canonical identities unique', () => {
+  const unique = (values, label) => {
+    const filtered = values.filter(Boolean);
+    assert.equal(new Set(filtered).size, filtered.length, `duplicate ${label} in project map`);
+  };
+  unique(OPS_PROJECTS.map(p => p.opsId), 'Ops ID');
+  unique(OPS_PROJECTS.map(p => p.notionPageId), 'Notion page ID');
+  unique(OPS_PROJECTS.map(p => p.githubRepoId), 'GitHub repo ID');
+  unique(OPS_PROJECTS.map(p => p.githubRepo), 'GitHub repository');
+  unique(OPS_PROJECTS.map(p => p.vercelProjectId), 'Vercel project ID');
+  unique(OPS_PROJECTS.flatMap(p => p.supabaseRefs), 'Supabase ref');
+  for (const project of OPS_PROJECTS) {
+    assert.match(project.opsId, /^pascaldev:/);
+    assert.ok(project.notionPageId, `missing Notion page for ${project.opsId}`);
+    assert.equal(Boolean(project.githubRepoId), Boolean(project.githubRepo), `partial GitHub identity for ${project.opsId}`);
+  }
 });
