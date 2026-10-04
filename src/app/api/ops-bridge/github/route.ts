@@ -1,7 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { findProjectByGitHubRepoId } from "@/lib/ops-bridge/project-map";
-import { updateNotionProjectSignal } from "@/lib/ops-bridge/notion";
+import {
+  createOpsEvent,
+  updateNotionProjectSignal,
+} from "@/lib/ops-bridge/notion";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,6 +62,33 @@ function describeGitHubEvent(
   }
 
   return `GitHub ${event}`;
+}
+
+function toOpsEventType(event: string) {
+  if (event === "push") return "Push" as const;
+  if (event === "pull_request") return "PR" as const;
+  if (event === "workflow_run") return "Workflow" as const;
+  return "Cambio" as const;
+}
+
+function githubEventResult(
+  event: string,
+  payload: Record<string, unknown>,
+): { result: "OK" | "Atención"; requiresAttention: boolean } {
+  if (event !== "workflow_run") {
+    return { result: "OK", requiresAttention: false };
+  }
+
+  const workflowRun = payload.workflow_run as
+    | { conclusion?: string | null }
+    | undefined;
+  const conclusion = workflowRun?.conclusion;
+
+  if (conclusion && !["success", "neutral", "skipped"].includes(conclusion)) {
+    return { result: "Atención", requiresAttention: true };
+  }
+
+  return { result: "OK", requiresAttention: false };
 }
 
 export async function POST(request: Request) {
@@ -122,11 +152,26 @@ export async function POST(request: Request) {
   }
 
   const signal = describeGitHubEvent(event, payload);
+  const eventStatus = githubEventResult(event, payload);
 
-  await updateNotionProjectSignal({
-    pageId: project.notionPageId,
-    signal,
-  });
+  await Promise.all([
+    updateNotionProjectSignal({
+      pageId: project.notionPageId,
+      signal,
+    }),
+    createOpsEvent({
+      title: signal,
+      source: "GitHub",
+      type: toOpsEventType(event),
+      result: eventStatus.result,
+      projectPageId: project.notionPageId,
+      opsId: project.opsId,
+      externalId: `github:${delivery}`,
+      detail: `${repository.full_name ?? repository.id} · ${event}`,
+      requiresAttention: eventStatus.requiresAttention,
+      processed: true,
+    }),
+  ]);
 
   return NextResponse.json({
     ok: true,
