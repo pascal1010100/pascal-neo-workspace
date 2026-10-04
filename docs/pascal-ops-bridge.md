@@ -7,6 +7,7 @@ Internal event bridge for Pascal.dev Company OS.
 - Canonical identity map for Company OS projects.
 - Signed GitHub webhook receiver at `/api/ops-bridge/github`.
 - GitHub events update the mapped project's **Última señal** and **Última actividad técnica** in Notion.
+- Processed GitHub events are written to the Company OS **Ops Events** audit log.
 - Health endpoint at `/api/ops-bridge/health`.
 - No production deployment, database, pricing, email, or domain changes are performed.
 
@@ -17,9 +18,10 @@ Configure these in the deployment environment. Never commit their values.
 ```bash
 GITHUB_WEBHOOK_SECRET=
 NOTION_API_TOKEN=
+NOTION_OPS_EVENTS_DATA_SOURCE_ID=
 ```
 
-The Notion integration behind `NOTION_API_TOKEN` must have update access to the Company OS project pages.
+The Notion integration behind `NOTION_API_TOKEN` must have update access to the Company OS project pages and insert access to the Ops Events data source. Set `NOTION_OPS_EVENTS_DATA_SOURCE_ID` to the Ops Events data source identifier.
 
 ## GitHub webhook
 
