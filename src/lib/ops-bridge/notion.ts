@@ -61,15 +61,10 @@ export async function updateNotionProjectSignal({
         "Última actividad técnica": {
           date: { start: occurredAt },
         },
-        Sync: {
-          select: { name: "Automático" },
-        },
-        "Sync estado": {
-          select: { name: "Mapeado" },
-        },
       },
     }),
     cache: "no-store",
+    signal: AbortSignal.timeout(10000),
   });
 
   if (!response.ok) {
@@ -171,6 +166,7 @@ export async function createOpsEvent({
       },
     }),
     cache: "no-store",
+    signal: AbortSignal.timeout(10000),
   });
 
   if (!response.ok) {
@@ -181,4 +177,45 @@ export async function createOpsEvent({
   }
 
   return response.json();
+}
+
+// Notion has no unique constraint: this handles sequential redelivery only.
+// Concurrent deliveries require a durable unique-key inbox before production.
+async function notionRequest(path: string, method = "GET", body?: unknown) {
+  const response = await fetch(`https://api.notion.com/v1/${path}`, {
+    method,
+    headers: notionHeaders(getNotionToken()),
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!response.ok) throw new Error(`Notion request failed (${response.status})`);
+  return response.json();
+}
+
+function eventsDataSource() {
+  const id = process.env.NOTION_OPS_EVENTS_DATA_SOURCE_ID;
+  if (!id) throw new Error("NOTION_OPS_EVENTS_DATA_SOURCE_ID is not configured");
+  return id;
+}
+
+export async function findOpsEvent(externalId: string) {
+  const data = await notionRequest(`data_sources/${eventsDataSource()}/query`, "POST", {
+    filter: { property: "External ID", rich_text: { equals: externalId } },
+    page_size: 2,
+  });
+  if (data.results.length > 1) throw new Error("Duplicate delivery records require reconciliation");
+  return data.results[0] as { id: string; properties: { Procesado?: { checkbox?: boolean }; Fecha?: { date?: { start?: string } } } } | undefined;
+}
+
+export async function completeOpsEvent(pageId: string) {
+  await notionRequest(`pages/${pageId}`, "PATCH", {
+    properties: { Procesado: { checkbox: true } },
+  });
+}
+
+export async function checkNotionAccess(pageIds: string[]) {
+  await notionRequest("users/me");
+  await notionRequest(`data_sources/${eventsDataSource()}/query`, "POST", { page_size: 1 });
+  await Promise.all(pageIds.map(id => notionRequest(`pages/${id}`)));
 }

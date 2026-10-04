@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { findProjectByGitHubRepoId } from "@/lib/ops-bridge/project-map";
 import {
   createOpsEvent,
+  findOpsEvent,
+  completeOpsEvent,
   updateNotionProjectSignal,
 } from "@/lib/ops-bridge/notion";
 
@@ -114,9 +116,18 @@ export async function POST(request: Request) {
   const event = request.headers.get("x-github-event") ?? "unknown";
   const delivery = request.headers.get("x-github-delivery") ?? "unknown";
 
+  if (!/^[a-zA-Z0-9-]{1,100}$/.test(delivery) || delivery === "unknown") {
+    return NextResponse.json({ ok: false, error: "Invalid delivery ID" }, { status: 400 });
+  }
+  if (event === "ping") return NextResponse.json({ ok: true, event });
+  if (!["push", "pull_request", "workflow_run"].includes(event)) {
+    return NextResponse.json({ ok: true, ignored: true, event }, { status: 202 });
+  }
+
   let payload: Record<string, unknown>;
   try {
     payload = JSON.parse(rawBody) as Record<string, unknown>;
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error("Invalid object");
   } catch {
     return NextResponse.json(
       { ok: false, error: "Invalid JSON payload" },
@@ -154,24 +165,33 @@ export async function POST(request: Request) {
   const signal = describeGitHubEvent(event, payload);
   const eventStatus = githubEventResult(event, payload);
 
-  await Promise.all([
-    updateNotionProjectSignal({
-      pageId: project.notionPageId,
-      signal,
-    }),
-    createOpsEvent({
+  try {
+    const externalId = `github:${delivery}`;
+    const existing = await findOpsEvent(externalId);
+    if (existing?.properties.Procesado?.checkbox) {
+      return NextResponse.json({ ok: true, duplicate: true, delivery });
+    }
+    const occurredAt = existing?.properties.Fecha?.date?.start ?? new Date().toISOString();
+    // Persist the pending record first; redelivery resumes this same record.
+    const record = existing ?? await createOpsEvent({
       title: signal,
+      occurredAt,
       source: "GitHub",
       type: toOpsEventType(event),
       result: eventStatus.result,
       projectPageId: project.notionPageId,
       opsId: project.opsId,
-      externalId: `github:${delivery}`,
+      externalId,
       detail: `${repository.full_name ?? repository.id} · ${event}`,
       requiresAttention: eventStatus.requiresAttention,
-      processed: true,
-    }),
-  ]);
+      processed: false,
+    });
+    await updateNotionProjectSignal({ pageId: project.notionPageId, signal, occurredAt });
+    await completeOpsEvent(record.id);
+  } catch {
+    // GitHub failed deliveries must be redelivered explicitly; no automatic retry claim.
+    return NextResponse.json({ ok: false, error: "Notion synchronization incomplete", delivery }, { status: 503 });
+  }
 
   return NextResponse.json({
     ok: true,

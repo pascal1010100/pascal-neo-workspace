@@ -10,6 +10,13 @@ export type OpsProject = {
 
 export const OPS_PROJECTS: OpsProject[] = [
   {
+    opsId: "pascaldev:ops-bridge",
+    notionPageId: "3efc52c9-d146-8159-b868-e792fbdb9b26",
+    githubRepoId: "1069836211",
+    githubRepo: "pascal1010100/pascal-neo-workspace",
+    supabaseRefs: [],
+  },
+  {
     opsId: "pascaldev:portfolio",
     notionPageId: "3b2c52c9-d146-80b7-a4f4-d818ea533968",
     githubRepoId: "1027335001",

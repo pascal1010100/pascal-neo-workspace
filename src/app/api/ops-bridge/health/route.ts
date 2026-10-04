@@ -1,32 +1,28 @@
 import { NextResponse } from "next/server";
 import { OPS_PROJECTS } from "@/lib/ops-bridge/project-map";
+import { checkNotionAccess } from "@/lib/ops-bridge/notion";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-export async function GET() {
-  const githubMapped = OPS_PROJECTS.filter(
-    (project) => project.githubRepoId,
-  ).length;
-  const vercelMapped = OPS_PROJECTS.filter(
-    (project) => project.vercelProjectId,
-  ).length;
-  const supabaseMapped = OPS_PROJECTS.filter(
-    (project) => project.supabaseRefs.length > 0,
-  ).length;
-
+export async function GET(request: Request) {
+  const token = process.env.OPS_HEALTH_TOKEN;
+  if (!token) return NextResponse.json({ ok: false, error: "Health access is not configured" }, { status: 503 });
+  if (request.headers.get("authorization") !== `Bearer ${token}`) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
+  let notionReachable = false;
+  try {
+    await checkNotionAccess(OPS_PROJECTS.map(project => project.notionPageId));
+    notionReachable = true;
+  } catch { /* Never expose upstream error bodies or credentials. */ }
+  const ok = notionReachable && Boolean(process.env.GITHUB_WEBHOOK_SECRET);
   return NextResponse.json({
-    ok: true,
+    ok,
     service: "pascal-ops-bridge",
+    notionReachable,
     mappedProjects: OPS_PROJECTS.length,
-    mappings: {
-      github: githubMapped,
-      vercel: vercelMapped,
-      supabase: supabaseMapped,
-    },
-    configuration: {
-      notion: Boolean(process.env.NOTION_API_TOKEN),
-      githubWebhook: Boolean(process.env.GITHUB_WEBHOOK_SECRET),
-      opsEvents: Boolean(process.env.NOTION_OPS_EVENTS_DATA_SOURCE_ID),
-    },
-  });
+    productionReady: false,
+    limitations: ["Write permissions and end-to-end execution need verification", "Concurrent delivery deduplication requires a durable unique-key inbox"],
+  }, { status: ok ? 200 : 503 });
 }
