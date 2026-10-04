@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
-import type { Engine, ISourceOptions } from '@tsparticles/engine';
+import type { Container, ISourceOptions } from '@tsparticles/engine';
 
 const ParticlesBackground = () => {
   const [init, setInit] = useState(false);
@@ -24,7 +24,7 @@ const ParticlesBackground = () => {
     initialize();
   }, []);
 
-  const particlesLoaded = async (container: any) => {
+  const particlesLoaded = async (container?: Container): Promise<void> => {
     console.log('Particles container loaded', container);
   };
 
