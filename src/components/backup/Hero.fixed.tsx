@@ -3,7 +3,7 @@
 import { motion, useInView, useScroll, useTransform, type Variants } from 'framer-motion';
 import { useRef } from 'react';
 import { ArrowRight, Code, GitBranch, Zap } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import KawaiiBot from './KawaiiBot';
 
