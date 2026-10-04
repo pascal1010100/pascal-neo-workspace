@@ -26,6 +26,7 @@ export async function GET() {
     configuration: {
       notion: Boolean(process.env.NOTION_API_TOKEN),
       githubWebhook: Boolean(process.env.GITHUB_WEBHOOK_SECRET),
+      opsEvents: Boolean(process.env.NOTION_OPS_EVENTS_DATA_SOURCE_ID),
     },
   });
 }
