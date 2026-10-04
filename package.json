@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test:ops-bridge": "node --test tests/ops-bridge.test.cjs"
+    "test:ops-bridge": "node --test tests/ops-bridge.test.cjs",
+    "test:harness": "node scripts/verify-harness.cjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
