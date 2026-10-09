@@ -2,7 +2,7 @@ name: Ops Bridge CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feat/pascal-ops-bridge]
   push:
     branches: [feat/pascal-ops-bridge]
 
